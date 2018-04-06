@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Windows;
@@ -13,6 +16,8 @@ namespace WinAppDriverSample
         [TestMethod]
         public void TestMethod1()
         {
+            var screenshotFolder = @"C:\works\screenshot";
+
             var appCapabilities = new DesiredCapabilities();
 
             // PC 設定アプリを起動
@@ -22,6 +27,8 @@ namespace WinAppDriverSample
             Assert.IsNotNull(session);
 
             session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(5));
+
+            session.GetScreenshot().SaveAsFile(Path.Combine(screenshotFolder, "Settings.jpg"), ImageFormat.Jpeg);
 
             var items = session.FindElementByAccessibilityId("PageGroupsListView")
                 .FindElementsByClassName("GridViewItem").Select(x => x.Text).ToList();
@@ -38,6 +45,11 @@ namespace WinAppDriverSample
                     {
                         Console.WriteLine($"\t{submenuItemText}");
                         session.FindElementByAccessibilityId("PagesListView").FindElementByName(submenuItemText).Click();
+                        Thread.Sleep(TimeSpan.FromSeconds(3));
+
+                        var screenshot = session.GetScreenshot();
+                        screenshot.SaveAsFile(Path.Combine(screenshotFolder, $"{item}-{submenuItemText}.jpg"), ImageFormat.Jpeg);
+
                     }
                 }
 
